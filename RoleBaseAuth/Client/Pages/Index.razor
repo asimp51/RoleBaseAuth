@@ -1,0 +1,18 @@
+﻿@page "/"
+
+<h1>Roles and Claims</h1>
+
+
+<AuthorizeView>
+    <NotAuthorized>
+        The following users and roles are seeded into the database for testing.
+        <ul>
+            <li>admin@admin.com (Administrator)</li>
+            <li>user@user.com (Moderator)</li>
+
+        </ul>
+        They all share the same password: "Passw0rd!"
+    </NotAuthorized>
+</AuthorizeView>
+
+

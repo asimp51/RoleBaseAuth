@@ -1,0 +1,114 @@
+﻿@page "/productdetails"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using RoleBaseAuth.Shared.Model
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize(Roles = "Administrator")]
+<h3>Products</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <a href='/product/add' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add Product
+        </a>
+    </div>
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search by name"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterProduct" />
+        @if (SearchString.Length > 0)
+        {
+            <div class="input-group-append">
+                <button class="btn btn-danger" @onclick="ResetSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+<br />
+@if (productList.Count == 0)
+{
+    <p><em>No Record Found</em></p>
+}
+else
+{
+    <table class="table table-striped align-middle table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th></th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in productList)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price</td>
+                    <td>
+                        <a href='/product/edit/@product.Id' class="btn btn-outline-dark" role="button">
+                            Edit
+                        </a>
+                        <a href='/product/delete/@product.Id' class="btn btn-outline-danger" role="button">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
+@code {
+    protected List<Product> productList = new();
+    protected List<Product> searchProductData = new();
+    protected Product product = new();
+    protected string SearchString { get; set; } = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProduct();
+    }
+    protected async Task GetProduct()
+    {
+        try
+        {
+            productList = await Http.GetFromJsonAsync<List<Product>>("Product");
+            searchProductData = productList;
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+       
+    }
+    protected void FilterProduct()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            productList = searchProductData
+                .Where(x => x.Name.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1)
+                .ToList();
+        }
+        else
+        {
+            productList = searchProductData;
+        }
+    }
+    protected void DeleteConfirm(int productID)
+    {
+        product = productList.FirstOrDefault(x => x.Id == productID);
+    }
+    public void ResetSearch()
+    {
+        SearchString = string.Empty;
+        productList = searchProductData;
+    }
+}
+
+
