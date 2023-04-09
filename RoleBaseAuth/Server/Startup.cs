@@ -16,6 +16,8 @@ namespace RoleBaseAuth.Server
     using RoleBaseAuth.Server.Interfaces;
     using RoleBaseAuth.Server.Models;
     using RoleBaseAuth.Shared;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging.Log4Net.AspNetCore;
 
     public class Startup
     {
@@ -53,7 +55,6 @@ namespace RoleBaseAuth.Server
                 //c.IncludeXmlComments(xmlPath);
                 //c.CustomSchemaIds(r => r.FullName);
             });
-
             services.AddIdentityServer()
                 .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
                 {
@@ -86,12 +87,12 @@ namespace RoleBaseAuth.Server
                IApplicationBuilder app,
                IWebHostEnvironment env,
                RoleManager<IdentityRole> roleManager,
-               UserManager<ApplicationUser> userManager)
+               UserManager<ApplicationUser> userManager,ILoggerFactory loggerFactory)
         {
 
             ApplicationDbInitialiser.SeedRoles(roleManager);
             ApplicationDbInitialiser.SeedUsers(userManager);
-
+            loggerFactory.AddLog4Net("log4net.xml");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
